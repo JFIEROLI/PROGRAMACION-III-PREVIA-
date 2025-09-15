@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Sesión Cerrada - Tu Solución{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active" aria-current="page">Sesión Cerrada</li>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center min-vh-100 align-items-center">
+        <div class="col-md-6 col-lg-5 col-xl-4">
+            <!-- Logo y título -->
+            <div class="text-center mb-5 animate-fade-in">
+                <div class="mb-4">
+                    <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+                </div>
+                <h1 class="text-gradient mb-2">¡Hasta pronto!</h1>
+                <p class="text-muted">Tu sesión ha sido cerrada exitosamente</p>
+            </div>
+            
+            <!-- Card de confirmación -->
+            <div class="card glass-effect animate-fade-in-up">
+                <div class="card-body p-5 text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-shield-check text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    
+                    <h5 class="card-title mb-3 text-primary">Sesión Cerrada</h5>
+                    <p class="card-text text-muted mb-4">
+                        Gracias por usar Tu Solución. Tu sesión ha sido cerrada de forma segura.
+                    </p>
+                    
+                    <div class="d-grid gap-3">
+                        <a href="{% url 'login' %}" class="btn btn-primary btn-lg hover-effect">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>
+                            Iniciar Sesión Nuevamente
+                        </a>
+                        <a href="{% url 'catering:index' %}" class="btn btn-outline-primary hover-effect">
+                            <i class="bi bi-house-door me-2"></i>
+                            Volver al Inicio
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Información adicional -->
+            <div class="card glass-effect mt-4 animate-fade-in-up" style="animation-delay: 0.2s;">
+                <div class="card-body text-center p-4">
+                    <h6 class="card-title text-primary">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Información de Seguridad
+                    </h6>
+                    <p class="card-text text-muted small mb-0">
+                        Por seguridad, tu sesión ha sido cerrada completamente. Puedes iniciar sesión nuevamente cuando lo necesites.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

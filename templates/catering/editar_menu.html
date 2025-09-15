@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }} - Tu Solución{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3">{{ title }}</h1>
+            <a href="{% url 'catering:evento_detail' evento.pk %}" class="btn btn-outline-primary">
+                <i class="bi bi-eye"></i> Ver Evento
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Información del evento -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-info-circle"></i> Información del Evento</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Cliente:</strong><br>
+                        {{ evento.id_cliente }}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Tipo:</strong><br>
+                        {{ evento.get_tipo_evento_display }}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Fecha:</strong><br>
+                        {{ evento.fecha|date:"d/m/Y" }} - {{ evento.hora|time:"H:i" }}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Personas:</strong><br>
+                        {{ evento.cantidad_personas }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Formulario para agregar productos -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-plus-circle"></i> Agregar Producto</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" class="needs-validation" novalidate id="menu-form">
+                    {% csrf_token %}
+                    
+                    {{ form.id_tipo_producto|as_crispy_field }}
+                    {{ form.id_producto|as_crispy_field }}
+                    {{ form.cantidad_producto|as_crispy_field }}
+                    
+                    <!-- Campo oculto para asegurar que el valor se envíe -->
+                    <input type="hidden" id="hidden_producto" name="id_producto" value="">
+                    <input type="hidden" id="hidden_tipo_producto" name="id_tipo_producto" value="">
+                    
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-plus"></i> Agregar al Menú
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Menú actual -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-list-ul"></i> Menú Actual</h5>
+            </div>
+            <div class="card-body">
+                {% if menu_actual %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Precio Unit.</th>
+                                <th>Total</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in menu_actual %}
+                            <tr>
+                                <td>{{ item.id_tipo_producto }}</td>
+                                <td>{{ item.id_producto }}</td>
+                                <td>{{ item.cantidad_producto }}</td>
+                                <td>${{ item.precio_uni|floatformat:2 }}</td>
+                                <td>${{ item.precio_total|floatformat:2 }}</td>
+                                <td>
+                                    <a href="{% url 'catering:eliminar_producto_menu' item.id_menu %}" 
+                                       class="btn btn-sm btn-outline-danger"
+                                       onclick="return confirm('¿Estás seguro de que quieres eliminar este producto?')">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-info">
+                                <td colspan="4" class="text-end"><strong>Total:</strong></td>
+                                <td><strong>${{ evento.precio_total|floatformat:2 }}</strong></td>
+                                <td></td>
+                            </tr>
+                            <tr class="table-success">
+                                <td colspan="4" class="text-end"><strong>Precio por persona:</strong></td>
+                                <td><strong>${{ evento.precio_por_persona|floatformat:2 }}</strong></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-list-ul text-muted" style="font-size: 3rem;"></i>
+                    <h5 class="text-muted mt-3">Menú vacío</h5>
+                    <p class="text-muted">Agrega productos al menú usando el formulario.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Cargar productos cuando cambie el tipo
+    const tipoSelect = document.getElementById('id_id_tipo_producto');
+    const productoSelect = document.getElementById('id_id_producto');
+    const hiddenProducto = document.getElementById('hidden_producto');
+    const hiddenTipoProducto = document.getElementById('hidden_tipo_producto');
+    
+    if (tipoSelect) {
+        tipoSelect.addEventListener('change', function() {
+            const tipoId = this.value;
+            if (tipoId) {
+                // Actualizar campo oculto
+                if (hiddenTipoProducto) {
+                    hiddenTipoProducto.value = tipoId;
+                }
+                
+                // Mostrar loading
+                productoSelect.innerHTML = '<option value="">Cargando productos...</option>';
+                productoSelect.disabled = true;
+                
+                cargarProductos(tipoId)
+                    .then(() => {
+                        productoSelect.disabled = false;
+                        
+                        // Agregar listener para sincronizar con el campo oculto
+                        productoSelect.addEventListener('change', function() {
+                            if (hiddenProducto) {
+                                hiddenProducto.value = this.value;
+                            }
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading productos:', error);
+                        productoSelect.innerHTML = '<option value="">Error al cargar productos</option>';
+                        productoSelect.disabled = false;
+                    });
+            } else {
+                productoSelect.innerHTML = '<option value="">Seleccione un tipo de producto primero</option>';
+                productoSelect.disabled = true;
+                if (hiddenTipoProducto) {
+                    hiddenTipoProducto.value = '';
+                }
+                if (hiddenProducto) {
+                    hiddenProducto.value = '';
+                }
+            }
+        });
+    }
+    
+    // Inicializar estado del select de productos
+    if (productoSelect && !tipoSelect.value) {
+        productoSelect.innerHTML = '<option value="">Seleccione un tipo de producto primero</option>';
+        productoSelect.disabled = true;
+    }
+    
+    // Manejar envío del formulario
+    const form = document.getElementById('menu-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Validar que se haya seleccionado un tipo de producto
+            if (!tipoSelect.value) {
+                e.preventDefault();
+                alert('Por favor, seleccione un tipo de producto.');
+                return false;
+            }
+            
+            // Validar que se haya seleccionado un producto
+            if (!productoSelect.value) {
+                e.preventDefault();
+                alert('Por favor, seleccione un producto específico.');
+                return false;
+            }
+            
+            // IMPORTANTE: Habilitar los campos antes del envío para que Django los procese
+            if (productoSelect.disabled) {
+                productoSelect.disabled = false;
+            }
+            if (tipoSelect.disabled) {
+                tipoSelect.disabled = false;
+            }
+            
+            // Asegurar que los campos ocultos tengan los valores correctos
+            hiddenProducto.value = productoSelect.value;
+            hiddenTipoProducto.value = tipoSelect.value;
+            
+            console.log('Enviando formulario con:', {
+                tipo_producto: hiddenTipoProducto.value,
+                producto: hiddenProducto.value,
+                cantidad: document.querySelector('input[name="cantidad_producto"]').value
+            });
+        });
+    }
+});
+</script>
+{% endblock %}
