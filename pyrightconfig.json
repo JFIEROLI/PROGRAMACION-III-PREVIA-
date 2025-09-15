@@ -1,0 +1,54 @@
+{
+    "include": [
+        "."
+    ],
+    "exclude": [
+        "**/node_modules",
+        "**/__pycache__",
+        "**/venv",
+        "**/.venv",
+        "**/migrations",
+        "**/static",
+        "**/media"
+    ],
+    "ignore": [
+        "**/migrations/**",
+        "**/static/**",
+        "**/media/**"
+    ],
+    "reportMissingImports": false,
+    "reportMissingTypeStubs": false,
+    "reportMissingModuleSource": false,
+    "reportAttributeAccessIssue": false,
+    "reportMethodAccessIssue": false,
+    "reportOptionalMemberAccess": false,
+    "reportOptionalSubscript": false,
+    "reportOptionalIterable": false,
+    "reportOptionalContextManager": false,
+    "reportOptionalOperand": false,
+    "reportUntypedFunctionDecorator": false,
+    "reportUntypedClassDecorator": false,
+    "reportUntypedBaseClass": false,
+    "reportUntypedNamedTuple": false,
+    "reportPrivateUsage": false,
+    "reportConstantRedefinition": false,
+    "reportIncompatibleMethodOverride": false,
+    "reportIncompatibleVariableOverride": false,
+    "reportInconsistentConstructor": false,
+    "pythonVersion": "3.8",
+    "pythonPlatform": "Windows",
+    "executionEnvironments": [
+        {
+            "root": ".",
+            "pythonVersion": "3.8",
+            "pythonPlatform": "Windows",
+            "extraPaths": [
+                "./venv/Lib/site-packages",
+                "./venv/Scripts"
+            ]
+        }
+    ],
+    "stubPath": "./typings",
+    "venvPath": "./venv",
+    "venv": "venv"
+}
