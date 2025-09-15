@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle del Evento - Responsable{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-3">Detalle del Evento</h2>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title">{{ evento.tipo_evento }} - {{ evento.fecha }} {{ evento.hora }}</h5>
+      <p class="card-text mb-1"><strong>Cliente:</strong> {{ evento.id_cliente }}</p>
+      <p class="card-text mb-1"><strong>Responsable:</strong> {{ evento.id_responsable }}</p>
+      <p class="card-text mb-1"><strong>Ubicación:</strong> {{ evento.ubicacion }}</p>
+      <p class="card-text mb-1"><strong>Cantidad de Personas:</strong> {{ evento.cantidad_personas }}</p>
+      <p class="card-text mb-1"><strong>Estado:</strong> {{ evento.get_estado_display }}</p>
+      <p class="card-text mb-1"><strong>Precio Total:</strong> {{ evento.precio_total|default:'-' }}</p>
+      <p class="card-text"><strong>Precio por Persona:</strong> {{ evento.precio_por_persona|default:'-' }}</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header">Menú del Evento</div>
+        <div class="card-body">
+          {% if menu_items %}
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Producto</th>
+                <th class="text-end">Cantidad</th>
+                <th class="text-end">Precio Unit.</th>
+                <th class="text-end">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in menu_items %}
+              <tr>
+                <td>{{ item.id_tipo_producto.descripcion }}</td>
+                <td>{{ item.id_producto.descripcion }}</td>
+                <td class="text-end">{{ item.cantidad_producto }}</td>
+                <td class="text-end">{{ item.precio_uni }}</td>
+                <td class="text-end">{{ item.precio_total }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <p class="mb-0">No hay ítems de menú cargados.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header">Personal Asignado</div>
+        <div class="card-body">
+          {% if servicios %}
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Personal</th>
+                <th class="text-end">Cantidad</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for s in servicios %}
+              <tr>
+                <td>{{ s.id_personal }}</td>
+                <td class="text-end">{{ s.cantidad_personal }}</td>
+                <td>{{ s.estado }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <p class="mb-0">No hay personal asignado.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <a class="btn btn-secondary" href="{% url 'catering:responsable_eventos' %}">Volver a mis eventos</a>
+</div>
+{% endblock %}

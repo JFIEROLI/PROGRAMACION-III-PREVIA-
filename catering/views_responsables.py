@@ -4,7 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Count, Sum
 from django.utils import timezone
 from datetime import datetime, timedelta
-from .models import EventoSolicitado, Cliente, Responsable, PerfilUsuario, MenuXTipoProducto, Personal, Servicio
+from decimal import Decimal
+from .models import EventoSolicitado, Cliente, Responsable, PerfilUsuario, MenuXTipoProducto, Personal, Servicio, Comprobante
 from .decorators import responsable_required, get_user_profile
 from .forms import EventoForm, EventoResponsableForm, MenuForm, AsignarPersonalForm, CambiarEstadoEventoForm, TrabajadorEventoForm
 
@@ -114,7 +115,7 @@ def responsable_evento_detail(request, pk):
     
     evento = get_object_or_404(EventoSolicitado, pk=pk, id_responsable=responsable)
 
-    menu_items = evento.menuxproducto_set.all()
+    menu_items = evento.menuxtipoproducto_set.all()
 
     servicios = evento.servicio_set.all()
     
@@ -149,6 +150,14 @@ def responsable_crear_evento(request):
 
             evento.id_responsable = responsable
             evento.estado = 'SOLICITADO'
+            # Crear comprobante asociado antes de guardar el evento (FK no admite NULL)
+            comprobante = Comprobante.objects.create(
+                id_cliente=evento.id_cliente,
+                importe_total_productos=Decimal('0.00'),
+                total_servicio=Decimal('0.00'),
+                precio_x_persona=Decimal('0.00')
+            )
+            evento.id_comprobante = comprobante
             evento.save()
 
             trabajadores_data = request.POST.getlist('trabajadores')

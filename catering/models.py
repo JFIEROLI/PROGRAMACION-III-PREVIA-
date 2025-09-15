@@ -141,6 +141,9 @@ class Comprobante(models.Model):
         return f"Comprobante {self.id_comprobante} - {self.id_cliente}"
     
     def save(self, *args, **kwargs):
+        # Asegurar fecha_pedido antes de usarla (auto_now_add se setea en pre_save)
+        if not self.fecha_pedido:
+            self.fecha_pedido = timezone.now().date()
         if not self.fecha_vigencia:
             self.fecha_vigencia = self.fecha_pedido + timedelta(days=10)
         super().save(*args, **kwargs)

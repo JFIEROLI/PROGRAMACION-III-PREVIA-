@@ -107,7 +107,7 @@ def cliente_evento_detail(request, pk):
     
     evento = get_object_or_404(EventoSolicitado, pk=pk, id_cliente=cliente)
 
-    menu_items = evento.menuxproducto_set.all()
+    menu_items = evento.menuxtipoproducto_set.all()
 
     servicios = evento.servicio_set.all()
     
